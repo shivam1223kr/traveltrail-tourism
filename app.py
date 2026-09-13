@@ -73,17 +73,81 @@ def create_booking():
 
 @app.post("/api/chat")
 def chat():
-    message = request.get_json(force=True).get("message", "").lower()
-    if any(word in message for word in ["cheap", "budget", "low cost"]):
-        answer = "For a budget-friendly trip, I suggest Jaipur or Varanasi. Jaipur offers heritage sites and good hotels from about ₹2,350 per night."
-    elif any(word in message for word in ["beach", "goa"]):
-        answer = "Goa is a great beach choice. Visit from November to February for pleasant weather. I can also compare its hotel prices for you."
-    elif any(word in message for word in ["mountain", "snow", "adventure", "trek"]):
-        answer = "Choose Manali for a shorter mountain trip or Ladakh for a longer high-altitude adventure. Manali suits most first-time travellers."
-    elif any(word in message for word in ["hello", "hi", "help"]):
-        answer = "Hello! I am TripGuide AI. Ask me about places, budgets, beaches, mountains, hotel prices or trip planning."
+    import random
+
+    message = request.get_json(force=True).get("message", "").lower().strip()
+
+    responses = {
+        "greeting": [
+            "Hello! 👋 I'm TripGuide AI. I can help you plan trips, choose destinations, compare hotels and suggest budgets.",
+            "Hi! 🌍 Welcome to TravelTrail. Tell me where you'd like to travel or what kind of trip you enjoy.",
+            "Hey! ✈️ I'm your TravelTrail trip assistant. Ask me about beaches, mountains, culture, hotels or budgets."
+        ],
+        "budget": [
+            "For a budget-friendly trip, Jaipur and Varanasi are great choices. Jaipur is especially good for heritage, food and affordable stays.",
+            "If you want to save money, consider Jaipur, Varanasi or Rishikesh. You can enjoy a good trip without a luxury budget.",
+            "For a low-cost holiday, I'd suggest Jaipur or Varanasi. If you tell me your approximate budget and number of days, I can suggest a better plan."
+        ],
+        "beach": [
+            "Goa is a popular beach destination with beaches, water activities and nightlife. November to February is generally a pleasant period to visit.",
+            "If beaches are your priority, Goa is an excellent option. For a quieter experience, you could also consider coastal destinations such as Kerala.",
+            "For a beach vacation, Goa is a strong choice. You can combine beaches with local food, sightseeing and water activities."
+        ],
+        "mountain": [
+            "Manali is a great choice for a shorter mountain trip, while Ladakh is better suited to a longer high-altitude adventure.",
+            "If you love mountains, Manali offers snow, valleys and adventure activities. Ladakh is ideal if you want dramatic landscapes and a more adventurous trip.",
+            "For a mountain holiday, I'd compare Manali and Ladakh. Manali is easier for a shorter trip; Ladakh is better for a high-altitude experience."
+        ],
+        "culture": [
+            "For culture and heritage, Jaipur is a fantastic option. You can explore forts, palaces, markets and traditional Rajasthani food.",
+            "If you enjoy history and culture, consider Jaipur or Varanasi. Both offer very different but memorable experiences.",
+            "Jaipur is a great cultural destination with forts, palaces, local markets and traditional cuisine."
+        ],
+        "hotel": [
+            "I can help you compare hotels by price, rating and amenities. Try the Hotel Compare section and select your destination.",
+            "For hotel selection, compare price, rating, location and amenities rather than choosing only by the lowest price.",
+            "TravelTrail's Hotel Compare feature can help you check different providers and identify the best-value option."
+        ],
+        "trip": [
+            "I'd be happy to help plan your trip! Tell me your destination, number of days, approximate budget and what you enjoy doing.",
+            "Let's plan it step by step. Tell me whether you prefer beaches, mountains, culture, nature or adventure.",
+            "For a personalized trip plan, share your destination, trip duration and budget. I can then suggest what to see and how to structure the trip."
+        ],
+        "thanks": [
+            "You're welcome! 😊 Have a wonderful journey.",
+            "Happy to help! ✈️ Enjoy planning your TravelTrail adventure.",
+            "Anytime! 🌍 Let me know if you need help choosing your next destination."
+        ]
+    }
+
+    if any(word in message for word in ["hello", "hi", "hey", "namaste"]):
+        category = "greeting"
+    elif any(word in message for word in ["thank", "thanks", "thx"]):
+        category = "thanks"
+    elif any(word in message for word in ["cheap", "budget", "low cost", "affordable", "money", "price"]):
+        category = "budget"
+    elif any(word in message for word in ["beach", "sea", "goa", "coast"]):
+        category = "beach"
+    elif any(word in message for word in ["mountain", "snow", "adventure", "trek", "hiking", "hill"]):
+        category = "mountain"
+    elif any(word in message for word in ["culture", "heritage", "history", "fort", "palace", "temple"]):
+        category = "culture"
+    elif any(word in message for word in ["hotel", "stay", "room", "resort", "accommodation"]):
+        category = "hotel"
+    elif any(word in message for word in ["trip", "plan", "itinerary", "travel", "days", "vacation", "holiday"]):
+        category = "trip"
     else:
-        answer = "I can help you find a destination. Tell me your interest such as beach, mountains, culture or adventure, plus your budget."
+        answer = (
+            "I can help with TravelTrail! 🌍 You can ask me things like: "
+            '"Where should I go for a beach trip?", '
+            '"Suggest a budget destination", '
+            '"Which is better, Manali or Ladakh?", '
+            '"Help me plan a 5-day trip", or '
+            '"How can I compare hotels?"'
+        )
+        return jsonify({"answer": answer})
+
+    answer = random.choice(responses[category])
     return jsonify({"answer": answer})
 
 if __name__ == "__main__":

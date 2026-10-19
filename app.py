@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, abort, jsonify, render_template, request
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -32,9 +32,39 @@ HOTELS = {
     ],
 }
 
+# Curated destination data for the detail-page demo. Distances are approximate road distances.
+DESTINATION_GUIDES = {
+    "goa": {
+        "name": "Goa", "state": "Goa, India", "tag": "Beaches, heritage & nightlife",
+        "image": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1800&q=85",
+        "intro": "Goa combines palm-lined beaches, Portuguese-era neighbourhoods, seafood and relaxed coastal stays. Plan 3 to 5 days to balance North Goa's energy with South Goa's quieter beaches.",
+        "best_time": "November to February for pleasant beach weather", "ideal_days": "3–5 days",
+        "language": "Konkani, Marathi, Hindi and English", "currency": "Indian Rupee (₹)",
+        "places": [
+            {"name": "Baga & Calangute", "type": "North Goa beaches", "detail": "Popular for water sports, cafés, beach shacks and a lively evening scene."},
+            {"name": "Fort Aguada", "type": "Heritage viewpoint", "detail": "A 17th-century fort with sweeping views of the Arabian Sea."},
+            {"name": "Fontainhas, Panaji", "type": "Latin Quarter", "detail": "Walk colourful Portuguese-style lanes, galleries and small cafés."},
+            {"name": "Palolem Beach", "type": "South Goa beach", "detail": "A scenic crescent beach suited to a slower day by the sea."},
+            {"name": "Dudhsagar Falls", "type": "Nature excursion", "detail": "A dramatic monsoon-fed waterfall. Confirm seasonal access before leaving."},
+            {"name": "Basilica of Bom Jesus", "type": "Heritage landmark", "detail": "One of Goa's best-known churches in Old Goa."},
+        ],
+        "foods": [["Goan fish curry rice", "A tangy coconut-based curry, often made with local fish."], ["Prawn balchão", "Spicy, pickled prawn preparation with a bold Goan flavour."], ["Xacuti", "A roasted-spice and coconut curry."], ["Bebinca", "A layered Goan dessert traditionally enjoyed after meals."]],
+        "travel": [["Goa International Airport (Dabolim)", "to Panaji", "about 28 km · 45–60 min by road"], ["Manohar International Airport (Mopa)", "to Candolim", "about 31 km · 50–75 min by road"], ["Karmali Railway Station", "to Panaji", "about 12 km · 25–35 min by road"], ["Madgaon Railway Station", "to Palolem", "about 38 km · 60–75 min by road"]],
+        "tips": ["Use app cabs or pre-agreed taxi fares for longer transfers.", "Carry sunscreen, water and modest cover-ups for churches and heritage sites.", "Ask about safety equipment and weather before booking water sports.", "Prices and travel times vary by season, traffic and pickup point."],
+    }
+}
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.get("/destination/<slug>")
+def destination_detail(slug):
+    guide = DESTINATION_GUIDES.get(slug.lower())
+    if not guide:
+        abort(404)
+    hotels = sorted(HOTELS.get(guide["name"], []), key=lambda hotel: hotel["price"])
+    return render_template("destination.html", guide=guide, hotels=hotels)
 
 @app.get("/health")
 def health():
